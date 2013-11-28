@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Runtime.Caching;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExpirableDictionaryTests
