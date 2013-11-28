@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>ExpirableItemDictionary</id>
+        <version>1.0.0</version>
+        <title>Expirable Item Dictionary</title>
+        <authors>Jon Davis,Stefan Rado</authors>
+        <projectUrl>https://github.com/kroimon/ExpirableItemDictionary</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>A small library providing an easy way to cache objects with an expiration time.</description>
+        <summary>A small library providing an easy way to cache objects with an expiration time.</summary>
+        <copyright>Jon Davis, Stefan Rado</copyright>
+        <tags>cache dictionary expirable expiration</tags>
+    </metadata>
+    <files>
+        <file src="ExpirableItemDictionary\bin\Release\ExpirableItemDictionary.dll" target="lib\net35\ExpirableItemDictionary.dll" />
+        <file src="ExpirableItemDictionary\bin\Release\ExpirableItemDictionary.pdb" target="lib\net35\ExpirableItemDictionary.pdb" />
+    </files>
+</package>
