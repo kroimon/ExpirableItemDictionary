@@ -1,0 +1,12 @@
+## Ignore Visual Studio specific files
+
+# User-specific files
+*.suo
+*.user
+
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# NuGet packages directory (will be restored automatically)
+packages/
