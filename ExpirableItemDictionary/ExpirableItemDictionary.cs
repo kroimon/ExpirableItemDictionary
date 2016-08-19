@@ -224,12 +224,8 @@ namespace ExpirableDictionary
                 {
                     if (innerDictionary[key].HasExpired)
                     {
-                        if (ItemExpired != null)
-                            ItemExpired(this, new ExpirableItemRemovedEventArgs<K, T>
-                            {
-                                Key = key,
-                                Value = innerDictionary[key].Value
-                            });
+                        ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<K, T>(key, innerDictionary[key].Value));
+
                         innerDictionary.Remove(key);
                         return false;
                     }
@@ -446,15 +442,8 @@ namespace ExpirableDictionary
 
                 removeList.ForEach(kvp =>
                 {
-                    if (ItemExpired != null)
-                        ItemExpired(this, new ExpirableItemRemovedEventArgs<K, T>
-                        {
-                            Key = kvp.Key,
-                            Value = kvp.Value.Value
-                        });
-
+                    ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<K, T>(kvp.Key, kvp.Value.Value));
                     innerDictionary.Remove(kvp.Key);
-
                 });
             }
         }

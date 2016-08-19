@@ -11,5 +11,11 @@ namespace ExpirableDictionary
     {
         public K Key { get; set; }
         public T Value { get; set; }
+
+        public ExpirableItemRemovedEventArgs(K key, T value)
+        {
+            Key = key;
+            Value = value;
+        }
     }
 }
