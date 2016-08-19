@@ -254,12 +254,7 @@ namespace ExpirableDictionary
         {
             lock (innerDictionary)
             {
-                if (ContainsKey(key))
-                {
-                    innerDictionary.Remove(key);
-                    return true;
-                }
-                return false;
+                return innerDictionary.Remove(key);
             }
         }
 
@@ -330,7 +325,9 @@ namespace ExpirableDictionary
             {
                 lock (innerDictionary)
                 {
-                    return ContainsKey(key) ? innerDictionary[key].Value : default(T);
+                    T value;
+                    TryGetValue(key, out value);
+                    return value;
                 }
             }
             set
@@ -442,14 +439,13 @@ namespace ExpirableDictionary
         {
             lock (innerDictionary)
             {
-                List<KeyValuePair<K, ExpirableItem<T>>> removeList
-                    = innerDictionary.Where(kvp => kvp.Value.HasExpired).ToList();
+                var removeList = innerDictionary.Where(kvp => kvp.Value.HasExpired).ToList();
 
-                removeList.ForEach(kvp =>
+                foreach (var kvp in removeList)
                 {
                     ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<K, T>(kvp.Key, kvp.Value.Value));
                     innerDictionary.Remove(kvp.Key);
-                });
+                }
             }
         }
 
