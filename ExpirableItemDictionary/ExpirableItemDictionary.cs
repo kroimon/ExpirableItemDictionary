@@ -31,9 +31,8 @@ namespace ExpirableDictionary
         /// Initializes a new instance of the <see cref="ExpirableItemDictionary&lt;K, T&gt;"/> class.
         /// </summary>
         public ExpirableItemDictionary()
+            : this((IEqualityComparer<K>)null)
         {
-            timer = new Timer(e => ClearExpiredItems(), null, autoClearExpiredItemsFrequency, autoClearExpiredItemsFrequency);
-            innerDictionary = new Dictionary<K, ExpirableItem<T>>();
         }
 
         /// <summary>
@@ -41,12 +40,8 @@ namespace ExpirableDictionary
         /// </summary>
         /// <param name="dictionary">A dictionary of values to pre-load into the cache.</param>
         public ExpirableItemDictionary(IEnumerable<KeyValuePair<K, T>> dictionary)
-            : this()
+            : this(dictionary, null)
         {
-            foreach (var kvp in dictionary)
-            {
-                innerDictionary.Add(kvp.Key, new ExpirableItem<T>(kvp.Value, defaultTimeToLive));
-            }
         }
 
         /// <summary>
@@ -76,8 +71,7 @@ namespace ExpirableDictionary
         /// <param name="dictionary">A dictionary of values to pre-load into the cache.</param>
         /// <param name="comparer">A comparer implementation. For example,
         /// for case-insensitive keys, use <see cref="StringComparer.InvariantCulture"/>.</param>
-        public ExpirableItemDictionary(IEnumerable<KeyValuePair<K, T>> dictionary,
-            IEqualityComparer<K> comparer)
+        public ExpirableItemDictionary(IEnumerable<KeyValuePair<K, T>> dictionary, IEqualityComparer<K> comparer)
             : this(comparer)
         {
             foreach (var kvp in dictionary)
@@ -93,8 +87,7 @@ namespace ExpirableDictionary
         /// <param name="comparer">A comparer implementation. For example,
         /// for case-insensitive keys, use <see cref="StringComparer.InvariantCulture"/>.</param>
         /// <param name="defaultTimeToLive">The default time-to-live.</param>
-        public ExpirableItemDictionary(IEqualityComparer<K> comparer,
-            TimeSpan defaultTimeToLive)
+        public ExpirableItemDictionary(IEqualityComparer<K> comparer, TimeSpan defaultTimeToLive)
             : this(comparer)
         {
             this.defaultTimeToLive = defaultTimeToLive;
@@ -155,7 +148,7 @@ namespace ExpirableDictionary
         /// <param name="value"></param>
         public void Add(K key, T value)
         {
-            innerDictionary.Add(key, new ExpirableItem<T>(value, defaultTimeToLive));
+            Add(key, value, defaultTimeToLive);
         }
 
         /// <summary>
@@ -166,7 +159,7 @@ namespace ExpirableDictionary
         /// <param name="timeToLive">The time-to-live.</param>
         public void Add(K key, T value, TimeSpan timeToLive)
         {
-            innerDictionary.Add(key, new ExpirableItem<T>(value, timeToLive));
+            Add(key, new ExpirableItem<T>(value, timeToLive));
         }
 
         /// <summary>
@@ -177,7 +170,7 @@ namespace ExpirableDictionary
         /// <param name="expires">The explicit date/time to expire the added item.</param>
         public void Add(K key, T value, DateTime expires)
         {
-            innerDictionary.Add(key, new ExpirableItem<T>(value, expires));
+            Add(key, new ExpirableItem<T>(value, expires));
         }
 
         /// <summary>
