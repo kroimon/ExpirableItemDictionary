@@ -387,9 +387,8 @@ namespace ExpirableDictionary
         {
             lock (innerDictionary)
             {
-                return ContainsKey(item.Key) &&
-                       (object)innerDictionary[item.Key].Value
-                       == (object)item.Value;
+                EqualityComparer<T> c = EqualityComparer<T>.Default;
+                return ContainsKey(item.Key) && c.Equals(innerDictionary[item.Key].Value, item.Value);
             }
         }
 
