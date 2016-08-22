@@ -191,18 +191,8 @@ namespace ExpirableDictionary
         /// <remarks>This method will auto-clear expired items.</remarks>
         public bool ContainsKey(TKey key)
         {
-            if (innerDictionary.ContainsKey(key))
-            {
-                if (innerDictionary[key].HasExpired)
-                {
-                    ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<TKey, TValue>(key, innerDictionary[key].Value));
-
-                    innerDictionary.Remove(key);
-                    return false;
-                }
-                return true;
-            }
-            return false;
+            TValue value;
+            return TryGetValue(key, out value);
         }
 
         /// <summary>
@@ -237,11 +227,23 @@ namespace ExpirableDictionary
         /// <returns></returns>
         public bool TryGetValue(TKey key, out TValue value)
         {
-            if (ContainsKey(key))
+            ExpirableItem<TValue> item;
+
+            if (innerDictionary.TryGetValue(key, out item))
             {
-                value = innerDictionary[key].Value;
+                if (item.HasExpired)
+                {
+                    ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<TKey, TValue>(key, item.Value));
+                    innerDictionary.Remove(key);
+
+                    value = default(TValue);
+                    return false;
+                }
+
+                value = item.Value;
                 return true;
             }
+
             value = default(TValue);
             return false;
         }
@@ -256,13 +258,15 @@ namespace ExpirableDictionary
         /// <returns></returns>
         public bool TryGetValueAndUpdate(TKey key, out TValue value, TimeSpan timeToLive)
         {
-            if (ContainsKey(key))
+            ExpirableItem<TValue> item;
+
+            if (innerDictionary.TryGetValue(key, out item))
             {
-                var item = innerDictionary[key];
-                value = item.Value;
                 item.TimeToLive = timeToLive;
+                value = item.Value;
                 return true;
             }
+
             value = default(TValue);
             return false;
         }
@@ -361,12 +365,7 @@ namespace ExpirableDictionary
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
         {
-            if (ContainsKey(item.Key))
-            {
-                innerDictionary.Remove(item.Key);
-                return true;
-            }
-            return false;
+            return Remove(item.Key);
         }
 
         /// <summary>
@@ -411,8 +410,11 @@ namespace ExpirableDictionary
         /// <param name="timeToLive"></param>
         public void Update(TKey key, TimeSpan timeToLive)
         {
-            if (ContainsKey(key))
-                innerDictionary[key].TimeToLive = timeToLive;
+            ExpirableItem<TValue> item;
+            if (innerDictionary.TryGetValue(key, out item))
+            {
+                item.TimeToLive = timeToLive;
+            }
             ClearExpiredItems();
         }
 
