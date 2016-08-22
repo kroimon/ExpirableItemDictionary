@@ -272,6 +272,28 @@ namespace ExpirableDictionary
         }
 
         /// <summary>
+        /// Tries to the get item having the specified key. Returns <c>true</c> if
+        /// the item exists and has not expired. Updates the item's expiration time.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="expi">The new expiration time.</param>
+        public bool TryGetValueAndUpdate(TKey key, out TValue value, DateTime expires)
+        {
+            ExpirableItem<TValue> item;
+
+            if (innerDictionary.TryGetValue(key, out item))
+            {
+                item.Expires = expires;
+                value = item.Value;
+                return true;
+            }
+
+            value = default(TValue);
+            return false;
+        }
+
+        /// <summary>
         /// Gets all of the values in the dictionary, without any key mappings.
         /// </summary>
         /// <value>The values.</value>
@@ -414,6 +436,22 @@ namespace ExpirableDictionary
             if (innerDictionary.TryGetValue(key, out item))
             {
                 item.TimeToLive = timeToLive;
+            }
+            ClearExpiredItems();
+        }
+
+        /// <summary>
+        /// Resets the expiration time for the specified item if the item exists in the dictionary,
+        /// and then cleans out expired items.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="expires"></param>
+        public void Update(TKey key, DateTime expires)
+        {
+            ExpirableItem<TValue> item;
+            if (innerDictionary.TryGetValue(key, out item))
+            {
+                item.Expires = expires;
             }
             ClearExpiredItems();
         }
