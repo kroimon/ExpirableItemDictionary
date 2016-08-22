@@ -8,14 +8,14 @@ namespace ExpirableDictionary
     /// Defines a caching table whereby items are configured to
     /// expire and thereby be removed automatically.
     /// </summary>
-    /// <typeparam name="K">Key</typeparam>
-    /// <typeparam name="T">Value</typeparam>
-    public class ExpirableItemDictionary<K, T> : IDictionary<K, T>
+    /// <typeparam name="TKey">Type of dictionary keys</typeparam>
+    /// <typeparam name="TValue">Type of dictionary values</typeparam>
+    public class ExpirableItemDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
 
         #region Private Fields
 
-        private readonly Dictionary<K, ExpirableItem<T>> innerDictionary;
+        private readonly Dictionary<TKey, ExpirableItem<TValue>> innerDictionary;
         private TimeSpan defaultTimeToLive = TimeSpan.FromMinutes(10);
 
         #endregion
@@ -26,7 +26,7 @@ namespace ExpirableDictionary
         /// Initializes a new instance of the <see cref="ExpirableItemDictionary&lt;K, T&gt;"/> class.
         /// </summary>
         public ExpirableItemDictionary()
-            : this((IEqualityComparer<K>)null)
+            : this((IEqualityComparer<TKey>)null)
         {
         }
 
@@ -34,7 +34,7 @@ namespace ExpirableDictionary
         /// Initializes a new instance of the <see cref="ExpirableItemDictionary&lt;K, T&gt;"/> class.
         /// </summary>
         /// <param name="dictionary">A dictionary of values to pre-load into the cache.</param>
-        public ExpirableItemDictionary(IEnumerable<KeyValuePair<K, T>> dictionary)
+        public ExpirableItemDictionary(IEnumerable<KeyValuePair<TKey, TValue>> dictionary)
             : this(dictionary, null)
         {
         }
@@ -54,9 +54,9 @@ namespace ExpirableDictionary
         /// </summary>
         /// <param name="comparer">A comparer implementation. For example,
         /// for case-insensitive keys, use <see cref="StringComparer.InvariantCulture"/>.</param>
-        public ExpirableItemDictionary(IEqualityComparer<K> comparer)
+        public ExpirableItemDictionary(IEqualityComparer<TKey> comparer)
         {
-            innerDictionary = new Dictionary<K, ExpirableItem<T>>(comparer);
+            innerDictionary = new Dictionary<TKey, ExpirableItem<TValue>>(comparer);
         }
 
         /// <summary>
@@ -65,12 +65,12 @@ namespace ExpirableDictionary
         /// <param name="dictionary">A dictionary of values to pre-load into the cache.</param>
         /// <param name="comparer">A comparer implementation. For example,
         /// for case-insensitive keys, use <see cref="StringComparer.InvariantCulture"/>.</param>
-        public ExpirableItemDictionary(IEnumerable<KeyValuePair<K, T>> dictionary, IEqualityComparer<K> comparer)
+        public ExpirableItemDictionary(IEnumerable<KeyValuePair<TKey, TValue>> dictionary, IEqualityComparer<TKey> comparer)
             : this(comparer)
         {
             foreach (var kvp in dictionary)
             {
-                innerDictionary.Add(kvp.Key, new ExpirableItem<T>(kvp.Value, defaultTimeToLive));
+                innerDictionary.Add(kvp.Key, new ExpirableItem<TValue>(kvp.Value, defaultTimeToLive));
             }
         }
 
@@ -81,7 +81,7 @@ namespace ExpirableDictionary
         /// <param name="comparer">A comparer implementation. For example,
         /// for case-insensitive keys, use <see cref="StringComparer.InvariantCulture"/>.</param>
         /// <param name="defaultTimeToLive">The default time-to-live.</param>
-        public ExpirableItemDictionary(IEqualityComparer<K> comparer, TimeSpan defaultTimeToLive)
+        public ExpirableItemDictionary(IEqualityComparer<TKey> comparer, TimeSpan defaultTimeToLive)
             : this(comparer)
         {
             this.defaultTimeToLive = defaultTimeToLive;
@@ -92,7 +92,7 @@ namespace ExpirableDictionary
 
         #region Events
 
-        public event EventHandler<ExpirableItemRemovedEventArgs<K, T>> ItemExpired;
+        public event EventHandler<ExpirableItemRemovedEventArgs<TKey, TValue>> ItemExpired;
 
         #endregion
 
@@ -112,7 +112,7 @@ namespace ExpirableDictionary
         /// Gets the inner dictionary which exposes the expiration strategy of each item.
         /// </summary>
         /// <value>The expirable items.</value>
-        public Dictionary<K, ExpirableItem<T>> ExpirableItems
+        public Dictionary<TKey, ExpirableItem<TValue>> ExpirableItems
         {
             get { return innerDictionary; }
         }
@@ -126,7 +126,7 @@ namespace ExpirableDictionary
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        public void Add(K key, T value)
+        public void Add(TKey key, TValue value)
         {
             Add(key, value, defaultTimeToLive);
         }
@@ -137,9 +137,9 @@ namespace ExpirableDictionary
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         /// <param name="timeToLive">The time-to-live.</param>
-        public void Add(K key, T value, TimeSpan timeToLive)
+        public void Add(TKey key, TValue value, TimeSpan timeToLive)
         {
-            Add(key, new ExpirableItem<T>(value, timeToLive));
+            Add(key, new ExpirableItem<TValue>(value, timeToLive));
         }
 
         /// <summary>
@@ -148,16 +148,16 @@ namespace ExpirableDictionary
         /// <param name="key"></param>
         /// <param name="value"></param>
         /// <param name="expires">The explicit date/time to expire the added item.</param>
-        public void Add(K key, T value, DateTime expires)
+        public void Add(TKey key, TValue value, DateTime expires)
         {
-            Add(key, new ExpirableItem<T>(value, expires));
+            Add(key, new ExpirableItem<TValue>(value, expires));
         }
 
         /// <summary>
         /// Adds a new expirable item to the collection.
         /// </summary>
         /// <param name="item">The item.</param>
-        public void Add(KeyValuePair<K, T> item)
+        public void Add(KeyValuePair<TKey, TValue> item)
         {
             Add(item.Key, item.Value);
         }
@@ -166,7 +166,7 @@ namespace ExpirableDictionary
         /// Adds a new expirable item to the collection.
         /// </summary>
         /// <param name="item">The item.</param>
-        public void Add(KeyValuePair<K, ExpirableItem<T>> item)
+        public void Add(KeyValuePair<TKey, ExpirableItem<TValue>> item)
         {
             Add(item.Key, item.Value);
         }
@@ -176,7 +176,7 @@ namespace ExpirableDictionary
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public void Add(K key, ExpirableItem<T> value)
+        public void Add(TKey key, ExpirableItem<TValue> value)
         {
             innerDictionary.Add(key, value);
         }
@@ -189,13 +189,13 @@ namespace ExpirableDictionary
         /// 	<c>true</c> if the dictionary contains the specified key and the item has not expired; otherwise, <c>false</c>.
         /// </returns>
         /// <remarks>This method will auto-clear expired items.</remarks>
-        public bool ContainsKey(K key)
+        public bool ContainsKey(TKey key)
         {
             if (innerDictionary.ContainsKey(key))
             {
                 if (innerDictionary[key].HasExpired)
                 {
-                    ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<K, T>(key, innerDictionary[key].Value));
+                    ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<TKey, TValue>(key, innerDictionary[key].Value));
 
                     innerDictionary.Remove(key);
                     return false;
@@ -209,7 +209,7 @@ namespace ExpirableDictionary
         /// Gets the keys of the collection for all items that have not yet expired.
         /// </summary>
         /// <value>The keys.</value>
-        public ICollection<K> Keys
+        public ICollection<TKey> Keys
         {
             get
             {
@@ -223,7 +223,7 @@ namespace ExpirableDictionary
         /// </summary>
         /// <param name="key">The key.</param>
         /// <returns></returns>
-        public bool Remove(K key)
+        public bool Remove(TKey key)
         {
             return innerDictionary.Remove(key);
         }
@@ -235,14 +235,14 @@ namespace ExpirableDictionary
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         /// <returns></returns>
-        public bool TryGetValue(K key, out T value)
+        public bool TryGetValue(TKey key, out TValue value)
         {
             if (ContainsKey(key))
             {
                 value = innerDictionary[key].Value;
                 return true;
             }
-            value = default(T);
+            value = default(TValue);
             return false;
         }
 
@@ -254,7 +254,7 @@ namespace ExpirableDictionary
         /// <param name="value">The value.</param>
         /// <param name="timeToLive">The new time-to-live.</param>
         /// <returns></returns>
-        public bool TryGetValueAndUpdate(K key, out T value, TimeSpan timeToLive)
+        public bool TryGetValueAndUpdate(TKey key, out TValue value, TimeSpan timeToLive)
         {
             if (ContainsKey(key))
             {
@@ -263,7 +263,7 @@ namespace ExpirableDictionary
                 item.TimeToLive = timeToLive;
                 return true;
             }
-            value = default(T);
+            value = default(TValue);
             return false;
         }
 
@@ -271,53 +271,53 @@ namespace ExpirableDictionary
         /// Gets all of the values in the dictionary, without any key mappings.
         /// </summary>
         /// <value>The values.</value>
-        public ICollection<T> Values
+        public ICollection<TValue> Values
         {
             get
             {
-                return this.Cast<T>().ToList();
+                return this.Cast<TValue>().ToList();
             }
         }
 
         /// <summary>
-        /// Gets or sets the <typeparamref name="T"/> value with the specified key.
+        /// Gets or sets the <typeparamref name="TValue"/> value with the specified key.
         /// </summary>
         /// <value></value>
-        public T this[K key]
+        public TValue this[TKey key]
         {
             get
             {
-                T value;
+                TValue value;
                 TryGetValue(key, out value);
                 return value;
             }
             set
             {
-                innerDictionary[key] = new ExpirableItem<T>(value, defaultTimeToLive);
+                innerDictionary[key] = new ExpirableItem<TValue>(value, defaultTimeToLive);
             }
         }
 
         /// <summary>
-        /// Sets the <typeparamref name="T"/> value with the specified key and time-to-live.
+        /// Sets the <typeparamref name="TValue"/> value with the specified key and time-to-live.
         /// </summary>
         /// <value></value>
-        public T this[K key, TimeSpan timeToLive]
+        public TValue this[TKey key, TimeSpan timeToLive]
         {
             set
             {
-                innerDictionary[key] = new ExpirableItem<T>(value, timeToLive);
+                innerDictionary[key] = new ExpirableItem<TValue>(value, timeToLive);
             }
         }
 
         /// <summary>
-        /// Sets the <typeparamref name="T"/> value with the specified key an explicit expiration date/time.
+        /// Sets the <typeparamref name="TValue"/> value with the specified key an explicit expiration date/time.
         /// </summary>
         /// <value></value>
-        public T this[K key, DateTime expires]
+        public TValue this[TKey key, DateTime expires]
         {
             set
             {
-                innerDictionary[key] = new ExpirableItem<T>(value, expires);
+                innerDictionary[key] = new ExpirableItem<TValue>(value, expires);
             }
         }
 
@@ -329,13 +329,13 @@ namespace ExpirableDictionary
             innerDictionary.Clear();
         }
 
-        bool ICollection<KeyValuePair<K, T>>.Contains(KeyValuePair<K, T> item)
+        bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
         {
-            EqualityComparer<T> c = EqualityComparer<T>.Default;
+            EqualityComparer<TValue> c = EqualityComparer<TValue>.Default;
             return ContainsKey(item.Key) && c.Equals(innerDictionary[item.Key].Value, item.Value);
         }
 
-        void ICollection<KeyValuePair<K, T>>.CopyTo(KeyValuePair<K, T>[] array, int arrayIndex)
+        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
             // if you need it, implement it
             throw new NotImplementedException();
@@ -354,12 +354,12 @@ namespace ExpirableDictionary
             }
         }
 
-        bool ICollection<KeyValuePair<K, T>>.IsReadOnly
+        bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
         {
             get { return false; }
         }
 
-        bool ICollection<KeyValuePair<K, T>>.Remove(KeyValuePair<K, T> item)
+        bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
         {
             if (ContainsKey(item.Key))
             {
@@ -381,7 +381,7 @@ namespace ExpirableDictionary
 
             foreach (var kvp in removeList)
             {
-                ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<K, T>(kvp.Key, kvp.Value.Value));
+                ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<TKey, TValue>(kvp.Key, kvp.Value.Value));
                 innerDictionary.Remove(kvp.Key);
             }
         }
@@ -391,7 +391,7 @@ namespace ExpirableDictionary
         /// (will not throw an exception on MoveNext if an item expires).
         /// </summary>
         /// <returns></returns>
-        public IEnumerator<KeyValuePair<K, T>> GetEnumerator()
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
             ClearExpiredItems();
             var ret = innerDictionary.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Value);
@@ -409,7 +409,7 @@ namespace ExpirableDictionary
         /// </summary>
         /// <param name="key"></param>
         /// <param name="timeToLive"></param>
-        public void Update(K key, TimeSpan timeToLive)
+        public void Update(TKey key, TimeSpan timeToLive)
         {
             if (ContainsKey(key))
                 innerDictionary[key].TimeToLive = timeToLive;
