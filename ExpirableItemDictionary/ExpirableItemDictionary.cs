@@ -314,7 +314,8 @@ namespace ExpirableDictionary
             get
             {
                 TValue value;
-                TryGetValue(key, out value);
+                if (!TryGetValue(key, out value))
+                    throw new KeyNotFoundException();
                 return value;
             }
             set
