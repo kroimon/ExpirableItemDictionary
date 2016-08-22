@@ -47,7 +47,17 @@ namespace ExpirableDictionary
         public TimeSpan TimeToLive
         {
             get { return Expires - DateTime.Now; }
-            set { Expires = DateTime.Now + value; }
+            set
+            {
+                if (value == TimeSpan.MaxValue)
+                {
+                    Expires = DateTime.MaxValue;
+                }
+                else
+                {
+                    Expires = DateTime.Now + value;
+                }
+            }
         }
 
         /// <summary>
