@@ -2,7 +2,7 @@
 
 namespace ExpirableDictionary
 {
-    public class ExpirableItem<T>
+    public class ExpirableItem<TValue>
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="ExpirableItem&lt;T&gt;" /> class, populating it with the specified
@@ -10,7 +10,7 @@ namespace ExpirableDictionary
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="expires">The expiration time.</param>
-        public ExpirableItem(T value, DateTime expires)
+        public ExpirableItem(TValue value, DateTime expires)
         {
             Value = value;
             Expires = expires;
@@ -22,7 +22,7 @@ namespace ExpirableDictionary
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="timeToLive">The time-to-live.</param>
-        public ExpirableItem(T value, TimeSpan timeToLive)
+        public ExpirableItem(TValue value, TimeSpan timeToLive)
         {
             Value = value;
             TimeToLive = timeToLive;
@@ -32,7 +32,7 @@ namespace ExpirableDictionary
         ///     Gets or sets the item's value.
         /// </summary>
         /// <value>The item's value.</value>
-        public T Value { get; set; }
+        public TValue Value { get; set; }
 
         /// <summary>
         ///     Gets or sets the item's expiration date/time.
