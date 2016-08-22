@@ -5,11 +5,11 @@ namespace ExpirableDictionary
     public class ExpirableItem<T>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExpirableItem&lt;T&gt;"/> class,
-        /// populating it with the specified value and an explicit expiration date/time.
+        ///     Initializes a new instance of the <see cref="ExpirableItem&lt;T&gt;" /> class, populating it with the specified
+        ///     value and an explicit expiration date/time.
         /// </summary>
         /// <param name="value">The value.</param>
-        /// <param name="expires">The expires.</param>
+        /// <param name="expires">The expiration time.</param>
         public ExpirableItem(T value, DateTime expires)
         {
             Value = value;
@@ -17,8 +17,8 @@ namespace ExpirableDictionary
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExpirableItem&lt;T&gt;"/> class,
-        /// populating it with the specified value and time-to-live.
+        ///     Initializes a new instance of the <see cref="ExpirableItem&lt;T&gt;" /> class, populating it with the specified
+        ///     value and time-to-live.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="timeToLive">The time-to-live.</param>
@@ -29,21 +29,21 @@ namespace ExpirableDictionary
         }
 
         /// <summary>
-        /// Gets or sets the value.
+        ///     Gets or sets the item's value.
         /// </summary>
-        /// <value>The value.</value>
+        /// <value>The item's value.</value>
         public T Value { get; set; }
 
         /// <summary>
-        /// Gets or sets the expiration date/time.
+        ///     Gets or sets the item's expiration date/time.
         /// </summary>
-        /// <value>The expiration date/time.</value>
+        /// <value>The expiration item's date/time.</value>
         public DateTime Expires { get; set; }
 
         /// <summary>
-        /// Gets or sets the time-to-live.
+        ///     Gets or sets the item's time-to-live.
         /// </summary>
-        /// <value>The time to live.</value>
+        /// <value>The item's time to live.</value>
         public TimeSpan TimeToLive
         {
             get { return Expires - DateTime.Now; }
@@ -61,10 +61,10 @@ namespace ExpirableDictionary
         }
 
         /// <summary>
-        /// Gets a value indicating whether this item has expired.
+        ///     Gets a value indicating whether this item has expired.
         /// </summary>
         /// <value>
-        /// 	<c>true</c> if this item has expired; otherwise, <c>false</c>.
+        ///     <c>true</c> if this item has expired; otherwise, <c>false</c>.
         /// </value>
         public bool HasExpired
         {
