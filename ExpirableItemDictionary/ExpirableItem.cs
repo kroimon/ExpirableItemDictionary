@@ -70,5 +70,13 @@ namespace ExpirableDictionary
         {
             get { return DateTime.Now > Expires; }
         }
+
+        /// <summary>
+        ///     Support implicit unboxing of ExpirableItems when casting to their value type.
+        /// </summary>
+        public static implicit operator TValue(ExpirableItem<TValue> a)
+        {
+            return a.Value;
+        }
     }
 }
