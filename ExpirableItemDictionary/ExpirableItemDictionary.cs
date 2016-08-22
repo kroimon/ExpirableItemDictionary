@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace ExpirableDictionary
 {
@@ -11,15 +10,13 @@ namespace ExpirableDictionary
     /// </summary>
     /// <typeparam name="K">Key</typeparam>
     /// <typeparam name="T">Value</typeparam>
-    public class ExpirableItemDictionary<K, T> : IDictionary<K, T>, IDisposable
+    public class ExpirableItemDictionary<K, T> : IDictionary<K, T>
     {
 
         #region Private Fields
 
         private readonly Dictionary<K, ExpirableItem<T>> innerDictionary;
         private TimeSpan defaultTimeToLive = TimeSpan.FromMinutes(10);
-        private TimeSpan autoClearExpiredItemsFrequency = TimeSpan.FromSeconds(15);
-        private readonly Timer timer;
 
         #endregion
 
@@ -59,7 +56,6 @@ namespace ExpirableDictionary
         /// for case-insensitive keys, use <see cref="StringComparer.InvariantCulture"/>.</param>
         public ExpirableItemDictionary(IEqualityComparer<K> comparer)
         {
-            timer = new Timer(e => ClearExpiredItems(), null, autoClearExpiredItemsFrequency, autoClearExpiredItemsFrequency);
             innerDictionary = new Dictionary<K, ExpirableItem<T>>(comparer);
         }
 
@@ -110,20 +106,6 @@ namespace ExpirableDictionary
         {
             get { return defaultTimeToLive; }
             set { defaultTimeToLive = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the frequency at which expired items are automatically cleared.
-        /// </summary>
-        /// <value>The auto clear expired items frequency.</value>
-        public TimeSpan AutoClearExpiredItemsFrequency
-        {
-            get { return autoClearExpiredItemsFrequency; }
-            set
-            {
-                autoClearExpiredItemsFrequency = value;
-                timer.Change(value, value);
-            }
         }
 
         /// <summary>
@@ -196,10 +178,7 @@ namespace ExpirableDictionary
         /// <param name="value">The value.</param>
         public void Add(K key, ExpirableItem<T> value)
         {
-            lock (innerDictionary)
-            {
-                innerDictionary.Add(key, value);
-            }
+            innerDictionary.Add(key, value);
         }
 
         /// <summary>
@@ -212,21 +191,18 @@ namespace ExpirableDictionary
         /// <remarks>This method will auto-clear expired items.</remarks>
         public bool ContainsKey(K key)
         {
-            lock (innerDictionary)
+            if (innerDictionary.ContainsKey(key))
             {
-                if (innerDictionary.ContainsKey(key))
+                if (innerDictionary[key].HasExpired)
                 {
-                    if (innerDictionary[key].HasExpired)
-                    {
-                        ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<K, T>(key, innerDictionary[key].Value));
+                    ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<K, T>(key, innerDictionary[key].Value));
 
-                        innerDictionary.Remove(key);
-                        return false;
-                    }
-                    return true;
+                    innerDictionary.Remove(key);
+                    return false;
                 }
-                return false;
+                return true;
             }
+            return false;
         }
 
         /// <summary>
@@ -237,11 +213,8 @@ namespace ExpirableDictionary
         {
             get
             {
-                lock (innerDictionary)
-                {
-                    ClearExpiredItems();
-                    return innerDictionary.Keys;
-                }
+                ClearExpiredItems();
+                return innerDictionary.Keys;
             }
         }
 
@@ -252,10 +225,7 @@ namespace ExpirableDictionary
         /// <returns></returns>
         public bool Remove(K key)
         {
-            lock (innerDictionary)
-            {
-                return innerDictionary.Remove(key);
-            }
+            return innerDictionary.Remove(key);
         }
 
         /// <summary>
@@ -267,16 +237,13 @@ namespace ExpirableDictionary
         /// <returns></returns>
         public bool TryGetValue(K key, out T value)
         {
-            lock (innerDictionary)
+            if (ContainsKey(key))
             {
-                if (ContainsKey(key))
-                {
-                    value = innerDictionary[key].Value;
-                    return true;
-                }
-                value = default(T);
-                return false;
+                value = innerDictionary[key].Value;
+                return true;
             }
+            value = default(T);
+            return false;
         }
 
         /// <summary>
@@ -289,18 +256,15 @@ namespace ExpirableDictionary
         /// <returns></returns>
         public bool TryGetValueAndUpdate(K key, out T value, TimeSpan timeToLive)
         {
-            lock (innerDictionary)
+            if (ContainsKey(key))
             {
-                if (ContainsKey(key))
-                {
-                    var item = innerDictionary[key];
-                    value = item.Value;
-                    item.TimeToLive = timeToLive;
-                    return true;
-                }
-                value = default(T);
-                return false;
+                var item = innerDictionary[key];
+                value = item.Value;
+                item.TimeToLive = timeToLive;
+                return true;
             }
+            value = default(T);
+            return false;
         }
 
         /// <summary>
@@ -323,19 +287,13 @@ namespace ExpirableDictionary
         {
             get
             {
-                lock (innerDictionary)
-                {
-                    T value;
-                    TryGetValue(key, out value);
-                    return value;
-                }
+                T value;
+                TryGetValue(key, out value);
+                return value;
             }
             set
             {
-                lock (innerDictionary)
-                {
-                    innerDictionary[key] = new ExpirableItem<T>(value, defaultTimeToLive);
-                }
+                innerDictionary[key] = new ExpirableItem<T>(value, defaultTimeToLive);
             }
         }
 
@@ -347,10 +305,7 @@ namespace ExpirableDictionary
         {
             set
             {
-                lock (innerDictionary)
-                {
-                    innerDictionary[key] = new ExpirableItem<T>(value, timeToLive);
-                }
+                innerDictionary[key] = new ExpirableItem<T>(value, timeToLive);
             }
         }
 
@@ -362,10 +317,7 @@ namespace ExpirableDictionary
         {
             set
             {
-                lock (innerDictionary)
-                {
-                    innerDictionary[key] = new ExpirableItem<T>(value, expires);
-                }
+                innerDictionary[key] = new ExpirableItem<T>(value, expires);
             }
         }
 
@@ -374,19 +326,13 @@ namespace ExpirableDictionary
         /// </summary>
         public void Clear()
         {
-            lock (innerDictionary)
-            {
-                innerDictionary.Clear();
-            }
+            innerDictionary.Clear();
         }
 
         bool ICollection<KeyValuePair<K, T>>.Contains(KeyValuePair<K, T> item)
         {
-            lock (innerDictionary)
-            {
-                EqualityComparer<T> c = EqualityComparer<T>.Default;
-                return ContainsKey(item.Key) && c.Equals(innerDictionary[item.Key].Value, item.Value);
-            }
+            EqualityComparer<T> c = EqualityComparer<T>.Default;
+            return ContainsKey(item.Key) && c.Equals(innerDictionary[item.Key].Value, item.Value);
         }
 
         void ICollection<KeyValuePair<K, T>>.CopyTo(KeyValuePair<K, T>[] array, int arrayIndex)
@@ -403,11 +349,8 @@ namespace ExpirableDictionary
         {
             get
             {
-                lock (innerDictionary)
-                {
-                    ClearExpiredItems();
-                    return innerDictionary.Count;
-                }
+                ClearExpiredItems();
+                return innerDictionary.Count;
             }
         }
 
@@ -418,15 +361,12 @@ namespace ExpirableDictionary
 
         bool ICollection<KeyValuePair<K, T>>.Remove(KeyValuePair<K, T> item)
         {
-            lock (innerDictionary)
+            if (ContainsKey(item.Key))
             {
-                if (ContainsKey(item.Key))
-                {
-                    innerDictionary.Remove(item.Key);
-                    return true;
-                }
-                return false;
+                innerDictionary.Remove(item.Key);
+                return true;
             }
+            return false;
         }
 
         /// <summary>
@@ -437,15 +377,12 @@ namespace ExpirableDictionary
         /// </summary>
         public void ClearExpiredItems()
         {
-            lock (innerDictionary)
-            {
-                var removeList = innerDictionary.Where(kvp => kvp.Value.HasExpired).ToList();
+            var removeList = innerDictionary.Where(kvp => kvp.Value.HasExpired).ToList();
 
-                foreach (var kvp in removeList)
-                {
-                    ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<K, T>(kvp.Key, kvp.Value.Value));
-                    innerDictionary.Remove(kvp.Key);
-                }
+            foreach (var kvp in removeList)
+            {
+                ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<K, T>(kvp.Key, kvp.Value.Value));
+                innerDictionary.Remove(kvp.Key);
             }
         }
 
@@ -456,12 +393,9 @@ namespace ExpirableDictionary
         /// <returns></returns>
         public IEnumerator<KeyValuePair<K, T>> GetEnumerator()
         {
-            lock (innerDictionary)
-            {
-                ClearExpiredItems();
-                var ret = innerDictionary.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Value);
-                return ret.GetEnumerator();
-            }
+            ClearExpiredItems();
+            var ret = innerDictionary.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Value);
+            return ret.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -477,20 +411,9 @@ namespace ExpirableDictionary
         /// <param name="timeToLive"></param>
         public void Update(K key, TimeSpan timeToLive)
         {
-            lock (innerDictionary)
-            {
-                if (ContainsKey(key))
-                    innerDictionary[key].TimeToLive = timeToLive;
-                ClearExpiredItems();
-            }
-        }
-
-        /// <summary>
-        /// Disposes of resources such as the auto-clearing timer.
-        /// </summary>
-        public void Dispose()
-        {
-            timer.Dispose();
+            if (ContainsKey(key))
+                innerDictionary[key].TimeToLive = timeToLive;
+            ClearExpiredItems();
         }
 
         #endregion
