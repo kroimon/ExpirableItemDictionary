@@ -8,10 +8,10 @@ namespace ExpirableDictionaryTests
     public class ExpirableItemTest
     {
         [TestMethod]
-        public void ImplicitCastTest()
+        public void ExplicitCastTest()
         {
             ExpirableItem<string> item = new ExpirableItem<string>("foobar", DateTime.MaxValue);
-            string s = item;
+            string s = (string)item;
             Assert.AreEqual(item.Value, s);
         }
     }

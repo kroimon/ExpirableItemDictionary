@@ -74,7 +74,7 @@ namespace ExpirableDictionary
         /// <summary>
         ///     Support implicit unboxing of ExpirableItems when casting to their value type.
         /// </summary>
-        public static implicit operator TValue(ExpirableItem<TValue> a)
+        public static explicit operator TValue(ExpirableItem<TValue> a)
         {
             return a.Value;
         }
