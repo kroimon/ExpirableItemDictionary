@@ -20,77 +20,33 @@ namespace ExpirableDictionary
 
         #region Constructors
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ExpirableItemDictionary&lt;K, T&gt;" /> class.
-        /// </summary>
-        public ExpirableItemDictionary()
-            : this((IEqualityComparer<TKey>)null)
-        {
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ExpirableItemDictionary&lt;K, T&gt;" /> class.
-        /// </summary>
-        /// <param name="dictionary">A dictionary of values to pre-load into the cache.</param>
-        public ExpirableItemDictionary(IEnumerable<KeyValuePair<TKey, TValue>> dictionary)
-            : this(dictionary, null)
-        {
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ExpirableItemDictionary&lt;K, T&gt;" /> class.
-        /// </summary>
-        /// <param name="defaultTimeToLive">The default time-to-live.</param>
         public ExpirableItemDictionary(TimeSpan defaultTimeToLive)
-            : this()
+            : this(defaultTimeToLive, 0, null)
+        {
+        }
+
+        public ExpirableItemDictionary(TimeSpan defaultTimeToLive, int capacity)
+            : this(defaultTimeToLive, capacity, null)
+        {
+        }
+
+        public ExpirableItemDictionary(TimeSpan defaultTimeToLive, int capacity, IEqualityComparer<TKey> comparer)
         {
             DefaultTimeToLive = defaultTimeToLive;
+            innerDictionary = new Dictionary<TKey, ExpirableItem<TValue>>(capacity, comparer);
         }
 
-        /// <summary>
-        ///     Initializes a new instance of this type using the specified <paramref name="comparer" />.
-        /// </summary>
-        /// <param name="comparer">
-        ///     A comparer implementation. For example,
-        ///     for case-insensitive keys, use <see cref="StringComparer.InvariantCulture" />.
-        /// </param>
-        public ExpirableItemDictionary(IEqualityComparer<TKey> comparer)
+        public ExpirableItemDictionary(TimeSpan defaultTimeToLive, IDictionary<TKey, TValue> dictionary)
+            : this(defaultTimeToLive, dictionary.Count, null)
         {
-            innerDictionary = new Dictionary<TKey, ExpirableItem<TValue>>(comparer);
-            DefaultTimeToLive = TimeSpan.FromMinutes(10);
+            Add(dictionary);
         }
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ExpirableItemDictionary&lt;K, T&gt;" /> class.
-        /// </summary>
-        /// <param name="dictionary">A dictionary of values to pre-load into the cache.</param>
-        /// <param name="comparer">
-        ///     A comparer implementation. For example,
-        ///     for case-insensitive keys, use <see cref="StringComparer.InvariantCulture" />.
-        /// </param>
-        public ExpirableItemDictionary(IEnumerable<KeyValuePair<TKey, TValue>> dictionary,
+        public ExpirableItemDictionary(TimeSpan defaultTimeToLive, IDictionary<TKey, TValue> dictionary,
             IEqualityComparer<TKey> comparer)
-            : this(comparer)
+            : this(defaultTimeToLive, dictionary.Count, comparer)
         {
-            foreach (var kvp in dictionary)
-            {
-                innerDictionary.Add(kvp.Key, new ExpirableItem<TValue>(kvp.Value, DefaultTimeToLive));
-            }
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ExpirableItemDictionary&lt;K, T&gt;" /> class
-        ///     using the specified <paramref name="comparer" />.
-        /// </summary>
-        /// <param name="comparer">
-        ///     A comparer implementation. For example,
-        ///     for case-insensitive keys, use <see cref="StringComparer.InvariantCulture" />.
-        /// </param>
-        /// <param name="defaultTimeToLive">The default time-to-live.</param>
-        public ExpirableItemDictionary(IEqualityComparer<TKey> comparer, TimeSpan defaultTimeToLive)
-            : this(comparer)
-        {
-            DefaultTimeToLive = defaultTimeToLive;
+            Add(dictionary);
         }
 
         #endregion
@@ -158,6 +114,17 @@ namespace ExpirableDictionary
         public void Add(TKey key, ExpirableItem<TValue> value)
         {
             innerDictionary.Add(key, value);
+        }
+
+        /// <summary>
+        ///     Adds all pairs from the given dictionary.
+        /// </summary>
+        public void Add(IEnumerable<KeyValuePair<TKey, TValue>> items)
+        {
+            foreach (var kvp in items)
+            {
+                Add(kvp);
+            }
         }
 
         /// <summary>
