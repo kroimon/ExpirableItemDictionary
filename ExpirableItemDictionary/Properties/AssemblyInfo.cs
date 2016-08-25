@@ -6,7 +6,7 @@
 [assembly: AssemblyTitle("ExpirableItemDictionary")]
 [assembly: AssemblyDescription("Expirable Item Dictionary")]
 [assembly: AssemblyProduct("ExpirableItemDictionary")]
-[assembly: AssemblyCopyright("Copyright © 2010 Jon Davis")]
+[assembly: AssemblyCopyright("© 2016 Jon Davis, Stefan Rado")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -18,5 +18,5 @@
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("2.0.0.0")]
+[assembly: AssemblyFileVersion("2.0.0.0")]
