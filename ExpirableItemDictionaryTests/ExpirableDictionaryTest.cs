@@ -11,42 +11,44 @@ namespace ExpirableDictionaryTests
         [TestMethod]
         public void DictionaryExpiresStaleItems()
         {
-            var dictionary = new ExpirableItemDictionary<string, object>();
-            dictionary.DefaultTimeToLive = TimeSpan.FromMilliseconds(50);
-            dictionary.Add("a", "b");
-            Thread.Sleep(51);
-            Assert.IsFalse(dictionary.ContainsKey("a"));
-        }
+            var dict = new ExpirableItemDictionary<string, object>(TimeSpan.FromMilliseconds(50));
+            dict.Add("a", 1);
+            dict.Add("b", 2, TimeSpan.FromMilliseconds(10));
+            dict.Add("c", 3, DateTime.MaxValue);
 
-        [TestMethod]
-        public void DictionaryDoesNotExpiredNonStaleItems()
-        {
-            var dictionary = new ExpirableItemDictionary<string, object>();
-            dictionary.DefaultTimeToLive = TimeSpan.FromMilliseconds(50);
-            dictionary.Add("a", "b");
-            Assert.IsTrue(dictionary.ContainsKey("a"));
+            Assert.IsTrue(dict.ContainsKey("a"));
+            Assert.IsTrue(dict.ContainsKey("b"));
+            Assert.IsTrue(dict.ContainsKey("c"));
+
+            Thread.Sleep(51);
+
+            Assert.IsFalse(dict.ContainsKey("a"));
+            Assert.IsFalse(dict.ContainsKey("b"));
+            Assert.IsTrue(dict.ContainsKey("c"));
         }
 
         [TestMethod]
         public void DictionaryRaisesExpirationEvent()
         {
-            var dictionary = new ExpirableItemDictionary<string, object>();
-            dictionary.DefaultTimeToLive = TimeSpan.FromMilliseconds(50);
+            var dict = new ExpirableItemDictionary<string, object>(TimeSpan.FromMilliseconds(50));
             string key = "a";
-            object value = "b";
-            dictionary[key] = value;
+            object value = 1;
+            dict[key] = value;
+
             object sender = null;
             string eventKey = null;
             object eventValue = null;
-            dictionary.ItemExpired += (s, e) =>
+            dict.ItemExpired += (s, e) =>
             {
                 sender = s;
                 eventKey = e.Key;
                 eventValue = e.Value;
             };
+
             Thread.Sleep(51);
-            dictionary.ClearExpiredItems();
-            Assert.AreSame(sender, dictionary);
+            dict.RemoveExpiredItems();
+
+            Assert.AreSame(sender, dict);
             Assert.AreEqual(eventKey, key);
             Assert.AreEqual(eventValue, value);
         }

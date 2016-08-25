@@ -101,22 +101,6 @@ namespace ExpirableDictionary
         }
 
         /// <summary>
-        ///     Adds a new expirable item to the collection.
-        /// </summary>
-        public void Add(KeyValuePair<TKey, ExpirableItem<TValue>> item)
-        {
-            Add(item.Key, item.Value);
-        }
-
-        /// <summary>
-        ///     Adds a new expirable item to the collection.
-        /// </summary>
-        public void Add(TKey key, ExpirableItem<TValue> value)
-        {
-            innerDictionary.Add(key, value);
-        }
-
-        /// <summary>
         ///     Adds all pairs from the given dictionary.
         /// </summary>
         public void Add(IEnumerable<KeyValuePair<TKey, TValue>> items)
@@ -124,6 +108,85 @@ namespace ExpirableDictionary
             foreach (var kvp in items)
             {
                 Add(kvp);
+            }
+        }
+
+        /// <summary>
+        ///     Adds a new expirable item to the collection.
+        /// </summary>
+        protected void Add(TKey key, ExpirableItem<TValue> value)
+        {
+            innerDictionary.Add(key, value);
+        }
+
+        /// <summary>
+        ///     Resets the time-to-live for the specified item if the item exists in the dictionary.
+        ///     Expired items will be removed afterwards.
+        /// </summary>
+        public void Update(TKey key, TimeSpan timeToLive)
+        {
+            ExpirableItem<TValue> item;
+            if (innerDictionary.TryGetValue(key, out item))
+            {
+                item.TimeToLive = timeToLive;
+            }
+            RemoveExpiredItems();
+        }
+
+        /// <summary>
+        ///     Resets the expiration time for the specified item if the item exists in the dictionary.
+        ///     Expired items will be removed afterwards.
+        /// </summary>
+        public void Update(TKey key, DateTime expires)
+        {
+            ExpirableItem<TValue> item;
+            if (innerDictionary.TryGetValue(key, out item))
+            {
+                item.Expires = expires;
+            }
+            RemoveExpiredItems();
+        }
+
+        /// <summary>
+        ///     Removes the item having the specified key.
+        /// </summary>
+        public bool Remove(TKey key)
+        {
+            return innerDictionary.Remove(key);
+        }
+
+        /// <summary>
+        ///     Removes all expired items from the dictionary.
+        /// </summary>
+        public void RemoveExpiredItems()
+        {
+            var removeList = innerDictionary.Where(kvp => kvp.Value.HasExpired).ToList();
+
+            foreach (var kvp in removeList)
+            {
+                ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<TKey, TValue>(kvp.Key, kvp.Value.Value));
+                innerDictionary.Remove(kvp.Key);
+            }
+        }
+
+        /// <summary>
+        ///     Removes all items from the internal dictionary.
+        /// </summary>
+        public void Clear()
+        {
+            innerDictionary.Clear();
+        }
+
+        /// <summary>
+        ///     Gets the number of non-expired cache items.
+        /// </summary>
+        /// <value>The count.</value>
+        public int Count
+        {
+            get
+            {
+                RemoveExpiredItems();
+                return innerDictionary.Count;
             }
         }
 
@@ -148,17 +211,17 @@ namespace ExpirableDictionary
         {
             get
             {
-                ClearExpiredItems();
+                RemoveExpiredItems();
                 return innerDictionary.Keys;
             }
         }
 
         /// <summary>
-        ///     Removes the item having the specified key.
+        ///     Gets all of the values in the dictionary, without any key mappings.
         /// </summary>
-        public bool Remove(TKey key)
+        public ICollection<TValue> Values
         {
-            return innerDictionary.Remove(key);
+            get { return innerDictionary.Values.Select(item => item.Value).ToList(); }
         }
 
         /// <summary>
@@ -226,14 +289,6 @@ namespace ExpirableDictionary
         }
 
         /// <summary>
-        ///     Gets all of the values in the dictionary, without any key mappings.
-        /// </summary>
-        public ICollection<TValue> Values
-        {
-            get { return this.Cast<TValue>().ToList(); }
-        }
-
-        /// <summary>
         ///     Gets or sets the <typeparamref name="TValue" /> value with the specified key.
         /// </summary>
         public TValue this[TKey key]
@@ -266,14 +321,6 @@ namespace ExpirableDictionary
             set { innerDictionary[key] = new ExpirableItem<TValue>(value, expires); }
         }
 
-        /// <summary>
-        ///     Removes all items from the internal dictionary.
-        /// </summary>
-        public void Clear()
-        {
-            innerDictionary.Clear();
-        }
-
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
         {
             EqualityComparer<TValue> c = EqualityComparer<TValue>.Default;
@@ -287,19 +334,6 @@ namespace ExpirableDictionary
                 .CopyTo(array, arrayIndex);
         }
 
-        /// <summary>
-        ///     Gets the number of non-expired cache items.
-        /// </summary>
-        /// <value>The count.</value>
-        public int Count
-        {
-            get
-            {
-                ClearExpiredItems();
-                return innerDictionary.Count;
-            }
-        }
-
         bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
         {
             get { return false; }
@@ -310,58 +344,16 @@ namespace ExpirableDictionary
             return Remove(item.Key);
         }
 
-        /// <summary>
-        ///     Removes all expired items from the dictionary.
-        /// </summary>
-        public void ClearExpiredItems()
-        {
-            var removeList = innerDictionary.Where(kvp => kvp.Value.HasExpired).ToList();
-
-            foreach (var kvp in removeList)
-            {
-                ItemExpired?.Invoke(this, new ExpirableItemRemovedEventArgs<TKey, TValue>(kvp.Key, kvp.Value.Value));
-                innerDictionary.Remove(kvp.Key);
-            }
-        }
-
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            ClearExpiredItems();
-            var ret = innerDictionary.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Value);
-            return ret.GetEnumerator();
+            RemoveExpiredItems();
+            return
+                innerDictionary.Select(kvp => new KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value.Value)).GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-
-        /// <summary>
-        ///     Resets the time-to-live for the specified item if the item exists in the dictionary.
-        ///     Expired items will be removed afterwards.
-        /// </summary>
-        public void Update(TKey key, TimeSpan timeToLive)
-        {
-            ExpirableItem<TValue> item;
-            if (innerDictionary.TryGetValue(key, out item))
-            {
-                item.TimeToLive = timeToLive;
-            }
-            ClearExpiredItems();
-        }
-
-        /// <summary>
-        ///     Resets the expiration time for the specified item if the item exists in the dictionary.
-        ///     Expired items will be removed afterwards.
-        /// </summary>
-        public void Update(TKey key, DateTime expires)
-        {
-            ExpirableItem<TValue> item;
-            if (innerDictionary.TryGetValue(key, out item))
-            {
-                item.Expires = expires;
-            }
-            ClearExpiredItems();
         }
 
         #endregion
