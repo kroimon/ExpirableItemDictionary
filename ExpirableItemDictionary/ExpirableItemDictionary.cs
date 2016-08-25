@@ -108,14 +108,6 @@ namespace ExpirableDictionary
         /// </summary>
         public TimeSpan DefaultTimeToLive { get; set; }
 
-        /// <summary>
-        /// Gets the inner dictionary which exposes the expiration strategy of each item.
-        /// </summary>
-        public Dictionary<TKey, ExpirableItem<TValue>> ExpirableItems
-        {
-            get { return innerDictionary; }
-        }
-
         #endregion
 
         #region Methods
