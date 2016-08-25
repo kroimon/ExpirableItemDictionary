@@ -282,8 +282,9 @@ namespace ExpirableDictionary
 
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
-            // if you need it, implement it
-            throw new NotImplementedException();
+            innerDictionary.Select(kvp => new KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value.Value))
+                .ToArray()
+                .CopyTo(array, arrayIndex);
         }
 
         /// <summary>
