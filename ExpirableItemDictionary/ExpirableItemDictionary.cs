@@ -328,7 +328,8 @@ namespace ExpirableDictionary
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
         {
             EqualityComparer<TValue> c = EqualityComparer<TValue>.Default;
-            return ContainsKey(item.Key) && c.Equals(innerDictionary[item.Key].Value, item.Value);
+            TValue value;
+            return TryGetValue(item.Key, out value) && c.Equals(value, item.Value);
         }
 
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
