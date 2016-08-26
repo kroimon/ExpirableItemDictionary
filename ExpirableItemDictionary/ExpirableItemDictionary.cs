@@ -221,7 +221,11 @@ namespace ExpirableDictionary
         /// </summary>
         public ICollection<TValue> Values
         {
-            get { return innerDictionary.Values.Select(item => item.Value).ToList(); }
+            get
+            {
+                RemoveExpiredItems();
+                return innerDictionary.Values.Select(item => item.Value).ToList();
+            }
         }
 
         /// <summary>
@@ -329,6 +333,7 @@ namespace ExpirableDictionary
 
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
+            RemoveExpiredItems();
             innerDictionary.Select(kvp => new KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value.Value))
                 .ToArray()
                 .CopyTo(array, arrayIndex);
