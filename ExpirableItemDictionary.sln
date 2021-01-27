@@ -1,19 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A51E5C4F-68EA-4EFD-85D2-75CB434CCA36}"
 	ProjectSection(SolutionItems) = preProject
 		ExpirableItemDictionary.nuspec = ExpirableItemDictionary.nuspec
-		ExpirableItemDictionary.vsmdi = ExpirableItemDictionary.vsmdi
-		Local.testsettings = Local.testsettings
-		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpirableItemDictionary", "ExpirableItemDictionary\ExpirableItemDictionary.csproj", "{9C1CA92A-5F00-4B96-AAC7-3C706FF6DC63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExpirableItemDictionary", "ExpirableItemDictionary\ExpirableItemDictionary.csproj", "{9C1CA92A-5F00-4B96-AAC7-3C706FF6DC63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpirableItemDictionaryTests", "ExpirableItemDictionaryTests\ExpirableItemDictionaryTests.csproj", "{A4272A86-EBC8-46C3-A912-FCFC88DB9F34}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExpirableItemDictionaryTests", "ExpirableItemDictionaryTests\ExpirableItemDictionaryTests.csproj", "{A4272A86-EBC8-46C3-A912-FCFC88DB9F34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +31,10 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {772CD266-E40A-4155-ACDD-DA88CF81606F}
+	EndGlobalSection
 	GlobalSection(SpecExplorer.ActivityCompletionStatus) = preSolution
 		SpecExplorer.ActivityCompletionStatus = 
-	EndGlobalSection
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = ExpirableItemDictionary.vsmdi
 	EndGlobalSection
 EndGlobal
