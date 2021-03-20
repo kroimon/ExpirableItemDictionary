@@ -2,10 +2,15 @@
 
   <PropertyGroup>
     <TargetFrameworks>net35;net45;net471;netstandard2.0;netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
-    <Version>2.0.2</Version>
-    <Description>Expirable Item Dictionary</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>2.1.0</Version>
+    <Description>A small library providing an easy way to cache objects with an expiration time.</Description>
+    <Authors>Jon Davis, Stefan Rado</Authors>
     <Copyright>© 2021 Jon Davis, Stefan Rado</Copyright>
+    <PackageProjectUrl>https://github.com/kroimon/ExpirableItemDictionary</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kroimon/ExpirableItemDictionary</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>cache dictionary expirable expiration</PackageTags>
   </PropertyGroup>
-
 
 </Project>

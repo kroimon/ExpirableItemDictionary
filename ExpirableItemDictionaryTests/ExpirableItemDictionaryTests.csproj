@@ -3,10 +3,9 @@
   <PropertyGroup>
     <TargetFrameworks>net45;net471;netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
     <IsPackable>false</IsPackable>
-    <Authors>ExpirableItemDictionaryTests</Authors>
+    <Authors>Jon Davis, Stefan Rado</Authors>
     <Description>Tests for the Expirable Item Dictionary</Description>
-    <Copyright>Copyright © 2021 Jon Davis</Copyright>
-    <Company>ExpirableItemDictionaryTests</Company>
+    <Copyright>© 2021 Jon Davis, Stefan Rado</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
